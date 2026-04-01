@@ -5,10 +5,20 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "seed": "tsx ./src/seed.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "@workspace/db": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "uuid": "^9.0.0",
+    "qrcode": "^1.5.4"
+  },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "catalog:",
+    "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^9.0.0",
     "tsx": "catalog:"
   }
 }

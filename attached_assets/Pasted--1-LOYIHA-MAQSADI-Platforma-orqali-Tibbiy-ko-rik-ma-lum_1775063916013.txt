@@ -1,0 +1,151 @@
+🎯 1. LOYIHA MAQSADI
+
+Platforma orqali:
+
+Tibbiy ko‘rik ma’lumotnomalari yaratish
+QR kod orqali tekshirish
+Soxta hujjatlarning oldini olish
+Admin va xodimlar orqali boshqaruv
+👥 2. FOYDALANUVCHI ROLLARI
+🧠 1. Super Admin
+
+To‘liq nazorat:
+
+Barcha userlarni boshqarish
+Doktorlar va xodimlarni qo‘shish/o‘chirish
+Rollarni belgilash
+Statistikani ko‘rish
+Tizim sozlamalari
+👨‍⚕️ 2. Admin (yoki katta doktor)
+Bemor qo‘shish
+Ma’lumotlarni tekshirish
+Status berish
+Komissiya raisini tanlash
+PDF generatsiya qilish
+👨‍💼 3. Oddiy xodim
+Faqat bemor ma’lumotlarini kiritadi
+Tekshiruv yuboradi
+O‘zi tasdiqlay olmaydi
+🧾 4. Tekshiruvchi (doktor / komissiya)
+Ma’lumotni ko‘rib chiqadi
+Tasdiqlaydi yoki rad etadi
+Sana va vaqt qo‘yadi
+🧩 3. ASOSIY FUNKSIYALAR
+📌 3.1 Bemor qo‘shish
+
+Forma orqali:
+
+Majburiy maydonlar:
+
+F.I.O
+JSHSHIR
+Passport/ID
+Tug‘ilgan sana
+Telefon
+Rasm (optional)
+🔄 3.2 Status jarayoni
+
+Flow:
+
+Draft (Yangi)
+Tekshiruvda
+Tasdiqlandi
+Rad etildi
+🧪 3.3 Tibbiy ko‘rik ma’lumotlari
+Tekshiruv sanasi (auto yoki manual)
+Tekshirgan shaxs (doktor)
+Komissiya raisi (tanlanadi)
+Keyingi ko‘rik sanasi
+🟢 3.4 Qaror (Status)
+
+Tanlash:
+
+✅ Ishlashga ruxsat berildi (yashil shtamp)
+❌ Ruxsat berilmadi (qizil shtamp)
+📄 3.5 PDF generatsiya
+
+Har bir tasdiqlangan bemor uchun:
+
+Tayyor dizayn (sen yuborgan rasmga o‘xshash)
+QR kod
+Unikal ID
+Sana, vaqt
+Imzo (digital)
+🔐 3.6 QR + Kod verifikatsiya
+QR bosilganda:
+
+User web sahifaga o‘tadi
+
+U yerda:
+Kod so‘raladi (PIN / Verify Code)
+Kod to‘g‘ri bo‘lsa:
+Ma’lumot chiqadi
+PDF ko‘rish/yuklab olish
+Kod noto‘g‘ri bo‘lsa:
+❌ Xato kod
+🔑 3.7 Unikal himoya tizimi
+
+Har hujjat uchun:
+
+UUID (unikal ID)
+QR code
+Secret code (masalan: 6 xonali)
+🌐 3.8 Web sahifa (tekshiruv uchun)
+
+Sahifa:
+
+QR orqali ochiladi
+Kod kiritiladi
+Natija chiqadi:
+Original yoki yo‘q
+Status (yashil/qizil)
+📊 3.9 Dashboard
+
+Admin uchun:
+
+Bugungi tekshiruvlar soni
+Tasdiqlanganlar
+Rad etilganlar
+Faol xodimlar
+🔐 4. AUTH (LOGIN)
+Login: username/email
+Parol
+JWT / Session
+🧱 5. TEXNOLOGIYA (tavsiya)
+Backend:
+Node.js (sen ishlatayotganing uchun 👍)
+Express / NestJS
+Database:
+PostgreSQL (professional)
+yoki MongoDB
+Frontend:
+React / Next.js
+QR:
+qrcode library
+PDF:
+pdfkit yoki puppeteer
+📁 6. DATABASE STRUKTURA
+Users
+id
+name
+role
+login
+password
+Patients
+id
+full_name
+passport
+jshshir
+birth_date
+phone
+MedicalRecords
+id
+patient_id
+status
+doctor_id
+chairman
+check_date
+next_check_date
+decision
+qr_code
+verify_code

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Tibbiy Ko'rik Platformasi"
+version = "1.0.0"
+id = "artifacts/med-platform"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18150
+
+[services.development]
+run = "pnpm --filter @workspace/med-platform run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/med-platform", "run", "build" ]
+publicDir = "artifacts/med-platform/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18150"
+BASE_PATH = "/"

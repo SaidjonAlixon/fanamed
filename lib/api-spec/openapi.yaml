@@ -1,22 +1,33 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Tibbiy Ko'rik Platformasi API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: patients
+    description: Patient management
+  - name: medical-records
+    description: Medical records
+  - name: dashboard
+    description: Dashboard statistics
+  - name: verify
+    description: QR verification
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,526 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users:
+    get:
+      operationId: getUsers
+      tags: [users]
+      summary: Get all users
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [super_admin, admin, staff, doctor]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: number
+            default: 20
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersListResponse"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /patients:
+    get:
+      operationId: getPatients
+      tags: [patients]
+      summary: Get all patients
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, pending, approved, rejected]
+        - name: page
+          in: query
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: number
+            default: 20
+      responses:
+        "200":
+          description: Patients list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientsListResponse"
+    post:
+      operationId: createPatient
+      tags: [patients]
+      summary: Create patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePatientRequest"
+      responses:
+        "201":
+          description: Patient created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+
+  /patients/{id}:
+    get:
+      operationId: getPatient
+      tags: [patients]
+      summary: Get patient by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Patient with medical record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientWithRecord"
+    put:
+      operationId: updatePatient
+      tags: [patients]
+      summary: Update patient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePatientRequest"
+      responses:
+        "200":
+          description: Updated patient
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+    delete:
+      operationId: deletePatient
+      tags: [patients]
+      summary: Delete patient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /patients/{id}/submit:
+    post:
+      operationId: submitPatient
+      tags: [patients]
+      summary: Submit patient for review (draft -> pending)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+
+  /medical-records:
+    post:
+      operationId: createMedicalRecord
+      tags: [medical-records]
+      summary: Create or update medical record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMedicalRecordRequest"
+      responses:
+        "200":
+          description: Medical record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalRecord"
+
+  /medical-records/{id}:
+    get:
+      operationId: getMedicalRecord
+      tags: [medical-records]
+      summary: Get medical record by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Medical record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalRecord"
+    put:
+      operationId: updateMedicalRecord
+      tags: [medical-records]
+      summary: Update medical record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMedicalRecordRequest"
+      responses:
+        "200":
+          description: Updated medical record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalRecord"
+
+  /medical-records/{id}/approve:
+    post:
+      operationId: approveMedicalRecord
+      tags: [medical-records]
+      summary: Approve medical record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApproveRecordRequest"
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalRecord"
+
+  /medical-records/{id}/reject:
+    post:
+      operationId: rejectMedicalRecord
+      tags: [medical-records]
+      summary: Reject medical record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectRecordRequest"
+      responses:
+        "200":
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalRecord"
+
+  /medical-records/{id}/pdf:
+    get:
+      operationId: generatePdf
+      tags: [medical-records]
+      summary: Generate PDF for medical record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: PDF URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PdfResponse"
+
+  /verify/{uuid}:
+    get:
+      operationId: getVerifyInfo
+      tags: [verify]
+      summary: Get basic info for verification page (public)
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Verification info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyInfoResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /verify/{uuid}/check:
+    post:
+      operationId: verifyCode
+      tags: [verify]
+      summary: Verify secret code and return full document info
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyCodeRequest"
+      responses:
+        "200":
+          description: Verified document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyResult"
+        "401":
+          description: Wrong code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/recent:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent patients/activity
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecentActivityResponse"
+
+  /dashboard/doctors:
+    get:
+      operationId: getDoctors
+      tags: [dashboard]
+      summary: Get active doctors list for selection
+      responses:
+        "200":
+          description: Doctors list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DoctorsListResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +562,386 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required: [username, password]
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        message:
+          type: string
+      required: [user]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, admin, staff, doctor]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, name, username, role, isActive, createdAt]
+
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, admin, staff, doctor]
+      required: [name, username, password, role]
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, admin, staff, doctor]
+        isActive:
+          type: boolean
+
+    UsersListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: number
+        page:
+          type: number
+        limit:
+          type: number
+      required: [users, total, page, limit]
+
+    Patient:
+      type: object
+      properties:
+        id:
+          type: number
+        fullName:
+          type: string
+        passport:
+          type: string
+        jshshir:
+          type: string
+        birthDate:
+          type: string
+        phone:
+          type: string
+        photoUrl:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending, approved, rejected]
+        createdById:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, fullName, passport, jshshir, birthDate, phone, status, createdById, createdAt, updatedAt]
+
+    PatientWithRecord:
+      type: object
+      properties:
+        id:
+          type: number
+        fullName:
+          type: string
+        passport:
+          type: string
+        jshshir:
+          type: string
+        birthDate:
+          type: string
+        phone:
+          type: string
+        photoUrl:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending, approved, rejected]
+        createdById:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        medicalRecord:
+          $ref: "#/components/schemas/MedicalRecord"
+      required: [id, fullName, passport, jshshir, birthDate, phone, status, createdById, createdAt, updatedAt]
+
+    CreatePatientRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        passport:
+          type: string
+        jshshir:
+          type: string
+        birthDate:
+          type: string
+        phone:
+          type: string
+        photoUrl:
+          type: string
+      required: [fullName, passport, jshshir, birthDate, phone]
+
+    UpdatePatientRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        passport:
+          type: string
+        jshshir:
+          type: string
+        birthDate:
+          type: string
+        phone:
+          type: string
+        photoUrl:
+          type: string
+
+    PatientsListResponse:
+      type: object
+      properties:
+        patients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Patient"
+        total:
+          type: number
+        page:
+          type: number
+        limit:
+          type: number
+      required: [patients, total, page, limit]
+
+    MedicalRecord:
+      type: object
+      properties:
+        id:
+          type: number
+        patientId:
+          type: number
+        status:
+          type: string
+          enum: [draft, pending, approved, rejected]
+        doctorId:
+          type: number
+        chairmanId:
+          type: number
+        checkDate:
+          type: string
+        nextCheckDate:
+          type: string
+        decision:
+          type: string
+          enum: [allowed, not_allowed]
+        qrCode:
+          type: string
+        verifyCode:
+          type: string
+        uuid:
+          type: string
+        rejectionReason:
+          type: string
+        doctorName:
+          type: string
+        chairmanName:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, patientId, status, createdAt, updatedAt]
+
+    CreateMedicalRecordRequest:
+      type: object
+      properties:
+        patientId:
+          type: number
+        doctorId:
+          type: number
+        chairmanId:
+          type: number
+        checkDate:
+          type: string
+        nextCheckDate:
+          type: string
+        decision:
+          type: string
+          enum: [allowed, not_allowed]
+      required: [patientId]
+
+    UpdateMedicalRecordRequest:
+      type: object
+      properties:
+        doctorId:
+          type: number
+        chairmanId:
+          type: number
+        checkDate:
+          type: string
+        nextCheckDate:
+          type: string
+        decision:
+          type: string
+          enum: [allowed, not_allowed]
+
+    ApproveRecordRequest:
+      type: object
+      properties:
+        doctorId:
+          type: number
+        chairmanId:
+          type: number
+        checkDate:
+          type: string
+        nextCheckDate:
+          type: string
+        decision:
+          type: string
+          enum: [allowed, not_allowed]
+      required: [decision]
+
+    RejectRecordRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+      required: [reason]
+
+    PdfResponse:
+      type: object
+      properties:
+        pdfUrl:
+          type: string
+        uuid:
+          type: string
+      required: [pdfUrl, uuid]
+
+    VerifyInfoResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+        found:
+          type: boolean
+      required: [uuid, found]
+
+    VerifyCodeRequest:
+      type: object
+      properties:
+        code:
+          type: string
+      required: [code]
+
+    VerifyResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        patient:
+          $ref: "#/components/schemas/Patient"
+        medicalRecord:
+          $ref: "#/components/schemas/MedicalRecord"
+        message:
+          type: string
+      required: [valid]
+
+    DashboardStats:
+      type: object
+      properties:
+        totalPatients:
+          type: number
+        todayChecks:
+          type: number
+        approved:
+          type: number
+        rejected:
+          type: number
+        pending:
+          type: number
+        draft:
+          type: number
+        activeStaff:
+          type: number
+        activeDoctors:
+          type: number
+      required: [totalPatients, todayChecks, approved, rejected, pending, draft, activeStaff, activeDoctors]
+
+    RecentActivityResponse:
+      type: object
+      properties:
+        patients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Patient"
+      required: [patients]
+
+    DoctorsListResponse:
+      type: object
+      properties:
+        doctors:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+      required: [doctors]
