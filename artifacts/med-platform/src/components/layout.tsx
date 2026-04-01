@@ -30,9 +30,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border text-sidebar-foreground">
-      <div className="p-6">
-        <h1 className="text-xl font-bold tracking-tight text-sidebar-primary">Tibbiy Ko'rik</h1>
-        <p className="text-xs text-muted-foreground mt-1">Platformasi</p>
+      <div className="p-6 flex flex-col items-center">
+        <div className="w-40 h-40 mb-2">
+          <img src="/logo_fanamed.jpeg" alt="FANA MED Logo" className="w-full h-full object-contain" />
+        </div>
+        <h1 className="text-xl font-bold tracking-tight text-sidebar-primary uppercase text-center">FANA MED KO'RIK</h1>
+        <p className="text-xs text-muted-foreground mt-1 font-medium tracking-widest text-center">PLATFORMASI</p>
       </div>
 
       <nav className="flex-1 space-y-1 px-4">
@@ -81,7 +84,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header & Content */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
-          <h1 className="text-lg font-bold text-primary">Tibbiy Ko'rik</h1>
+          <h1 className="text-lg font-bold text-primary uppercase">FANA MED KO'RIK</h1>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">

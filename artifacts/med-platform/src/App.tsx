@@ -16,6 +16,7 @@ import UsersList from "@/pages/users";
 import NewUser from "@/pages/users/new";
 import EditUser from "@/pages/users/edit";
 import VerifyPage from "@/pages/verify/[uuid]";
+import VerifyStandalone from "@/pages/verify/index";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/verify" component={VerifyStandalone} />
       <Route path="/verify/:uuid" component={VerifyPage} />
       
       <Route path="/">

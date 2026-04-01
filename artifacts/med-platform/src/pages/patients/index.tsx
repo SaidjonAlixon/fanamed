@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useGetPatients } from "@workspace/api-client-react";
-import { Link } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ export default function PatientsList() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
+  const [location, setLocation] = useLocation();
   const { data, isLoading } = useGetPatients({
     search: debouncedSearch || undefined,
     status: status === "all" ? undefined : status,
@@ -91,19 +92,21 @@ export default function PatientsList() {
                   </TableHeader>
                   <TableBody>
                     {data.patients.map((patient) => (
-                      <TableRow key={patient.id}>
-                        <TableCell className="font-medium">{patient.fullName}</TableCell>
-                        <TableCell>{patient.passport}</TableCell>
-                        <TableCell>{patient.jshshir}</TableCell>
-                        <TableCell>{patient.phone}</TableCell>
+                      <TableRow 
+                        key={patient.id} 
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => setLocation(`/patients/${patient.id}`)}
+                      >
+                        <TableCell className="font-medium text-slate-900">{patient.fullName}</TableCell>
+                        <TableCell className="text-slate-700">{patient.passport}</TableCell>
+                        <TableCell className="text-slate-700">{patient.jshshir}</TableCell>
+                        <TableCell className="text-slate-700">{patient.phone}</TableCell>
                         <TableCell>
                           <StatusBadge status={patient.status} />
                         </TableCell>
-                        <TableCell>{format(new Date(patient.createdAt), "dd.MM.yyyy")}</TableCell>
+                        <TableCell className="text-slate-600">{format(new Date(patient.createdAt), "dd.MM.yyyy")}</TableCell>
                         <TableCell className="text-right">
-                          <Link href={`/patients/${patient.id}`}>
-                            <Button variant="ghost" size="sm">Batafsil</Button>
-                          </Link>
+                          <Button variant="ghost" size="sm" className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10">Batafsil</Button>
                         </TableCell>
                       </TableRow>
                     ))}

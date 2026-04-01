@@ -61,7 +61,7 @@ router.post("/", async (req, res): Promise<void> => {
 });
 
 router.get("/:id", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ID" });
     return;
@@ -81,7 +81,7 @@ router.get("/:id", async (req, res): Promise<void> => {
 });
 
 router.put("/:id", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ID" });
     return;
@@ -107,7 +107,7 @@ router.put("/:id", async (req, res): Promise<void> => {
 });
 
 router.post("/:id/approve", requireRole(["super_admin", "admin", "doctor"]), async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ID" });
     return;
@@ -131,7 +131,7 @@ router.post("/:id/approve", requireRole(["super_admin", "admin", "doctor"]), asy
     const recordUuid = uuidv4();
     const verifyCode = generateVerifyCode();
 
-    const verifyUrl = `${process.env.PUBLIC_URL || "https://replit.app"}/verify/${recordUuid}`;
+    const verifyUrl = `${process.env.PUBLIC_URL || "https://fanamed.uz"}/verify/${recordUuid}`;
     const qrCode = await QRCode.toDataURL(verifyUrl);
 
     const [updated] = await db.update(medicalRecordsTable).set({
@@ -153,7 +153,7 @@ router.post("/:id/approve", requireRole(["super_admin", "admin", "doctor"]), asy
 });
 
 router.post("/:id/reject", requireRole(["super_admin", "admin", "doctor"]), async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ID" });
     return;
@@ -189,7 +189,7 @@ router.post("/:id/reject", requireRole(["super_admin", "admin", "doctor"]), asyn
 });
 
 router.get("/:id/pdf", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ID" });
     return;
@@ -205,7 +205,7 @@ router.get("/:id/pdf", async (req, res): Promise<void> => {
     }
 
     const host = req.headers.host || "localhost";
-    const protocol = req.headers["x-forwarded-proto"] || "https";
+    const protocol = req.headers["x-forwarded-proto"] || (process.env.NODE_ENV === "production" ? "https" : "http");
     const pdfUrl = `${protocol}://${host}/api/pdf/${record.uuid}`;
 
     res.json({ pdfUrl, uuid: record.uuid });

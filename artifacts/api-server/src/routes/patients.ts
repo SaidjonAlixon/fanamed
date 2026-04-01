@@ -60,8 +60,15 @@ router.post("/", async (req, res): Promise<void> => {
   try {
     const [patient] = await db.insert(patientsTable).values({
       ...parsed.data,
+      status: "pending",
       createdById: req.session.userId!,
     }).returning();
+
+    // Automatically create a pending medical record
+    await db.insert(medicalRecordsTable).values({
+      patientId: patient.id,
+      status: "pending"
+    });
 
     res.status(201).json({
       ...patient,
@@ -199,7 +206,16 @@ router.post("/:id/submit", async (req, res): Promise<void> => {
 
     const [updated] = await db.update(patientsTable).set({ status: "pending" }).where(eq(patientsTable.id, id)).returning();
 
-    await db.update(medicalRecordsTable).set({ status: "pending" }).where(eq(medicalRecordsTable.patientId, id));
+    const existingRecord = await db.select().from(medicalRecordsTable).where(eq(medicalRecordsTable.patientId, id)).limit(1);
+    
+    if (existingRecord[0]) {
+      await db.update(medicalRecordsTable).set({ status: "pending" }).where(eq(medicalRecordsTable.id, existingRecord[0].id));
+    } else {
+      await db.insert(medicalRecordsTable).values({
+        patientId: id,
+        status: "pending"
+      });
+    }
 
     res.json({
       ...updated,

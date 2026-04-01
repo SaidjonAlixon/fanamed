@@ -13,14 +13,15 @@ const patientSchema = z.object({
   jshshir: z.string().length(14, "JSHSHIR 14 xonali son bo'lishi kerak"),
   birthDate: z.string().min(1, "Tug'ilgan sanani tanlang"),
   phone: z.string().min(9, "Telefon raqamini kiriting"),
-  photoUrl: z.string().optional(),
+  address: z.string().optional(),
+  workplace: z.string().optional(),
 });
 
 type PatientFormValues = z.infer<typeof patientSchema>;
 
 interface PatientFormProps {
   initialValues?: Partial<PatientFormValues>;
-  onSubmit: (data: CreatePatientRequest) => void;
+  onSubmit: (data: any) => void;
   isSubmitting: boolean;
 }
 
@@ -33,7 +34,8 @@ export function PatientForm({ initialValues, onSubmit, isSubmitting }: PatientFo
       jshshir: initialValues?.jshshir || "",
       birthDate: initialValues?.birthDate ? initialValues.birthDate.split('T')[0] : "",
       phone: initialValues?.phone || "",
-      photoUrl: initialValues?.photoUrl || "",
+      address: initialValues?.address || "",
+      workplace: initialValues?.workplace || "",
     },
   });
 
@@ -108,12 +110,25 @@ export function PatientForm({ initialValues, onSubmit, isSubmitting }: PatientFo
           />
           <FormField
             control={form.control}
-            name="photoUrl"
+            name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Rasm URL (ixtiyoriy)</FormLabel>
+                <FormLabel>Yashash joyi</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://..." {...field} />
+                  <Input placeholder="Viloyat, shahar, tuman, ko'cha, uy" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="workplace"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ish yoki o'qish joyi (ixtiyoriy)</FormLabel>
+                <FormControl>
+                  <Input placeholder="MCHJ, zavod, maktab va h.k." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
