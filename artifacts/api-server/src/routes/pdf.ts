@@ -66,6 +66,21 @@ function formatDateTimeDMY(value: string | Date | null | undefined): string {
   return `${ddmmyyyy} ${hh}:${min}`;
 }
 
+function buildSafePdfFilename(fullName: string): { ascii: string; utf8: string } {
+  const compact = fullName.trim().replace(/\s+/g, "_");
+  const asciiOnly = compact
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7E]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  return {
+    ascii: asciiOnly || "malumotnoma",
+    utf8: encodeURIComponent(compact || "malumotnoma"),
+  };
+}
+
 router.get("/:uuid", async (req, res): Promise<void> => {
   const { uuid } = req.params;
 
@@ -108,8 +123,12 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     doc.registerFont("DocFont-Bold", boldFont);
     doc.font("DocFont-Normal");
     
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename=ma'lumotnoma_${patient.fullName.replace(/\s+/g, '_')}.pdf`);
+    const safeFilename = buildSafePdfFilename(patient.fullName);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="malumotnoma_${safeFilename.ascii}.pdf"; filename*=UTF-8''malumotnoma_${safeFilename.utf8}.pdf`,
+    );
     // Avoid stale PDFs being cached by browsers/CDNs during rapid iteration.
     res.setHeader('Cache-Control', 'no-store, max-age=0');
 
