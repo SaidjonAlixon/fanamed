@@ -7,6 +7,10 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// Behind Vercel/other proxies we must trust `x-forwarded-*` headers,
+// otherwise secure cookies may not be set correctly.
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
@@ -34,13 +38,16 @@ app.use(cors({
 
 app.use(session({
   secret: process.env.SESSION_SECRET || "tibbiy-korik-secret-2024",
+  proxy: process.env.NODE_ENV === "production",
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    // Frontend and API are served from the same Vercel domain, so `lax` is sufficient.
+    // Using `none` can cause cookies to be rejected in some environments.
+    sameSite: "lax",
   },
 }));
 
