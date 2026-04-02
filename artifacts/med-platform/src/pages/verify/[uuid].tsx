@@ -62,7 +62,7 @@ export default function VerifyPage() {
           </div>
           <CardTitle className="text-2xl font-bold text-primary">Tibbiy hujjatni tekshirish</CardTitle>
           <CardDescription className="text-base mt-2">
-            Hujjatning haqiqiyligini tekshirish uchun SMS orqali kelgan 6 xonali maxfiy kodni kiriting
+            Tekshirish uchun ma'lumotnomada taqdim etilgan QR-kod yonidagi 6 xonali raqamni kiriting
           </CardDescription>
         </CardHeader>
         
@@ -133,6 +133,17 @@ export default function VerifyPage() {
                     ❌ Ruxsat berilmadi
                   </div>
                 )}
+              </div>
+
+              <div className="pt-2">
+                <a
+                  href={`/api/pdf/${uuid}`}
+                  className="flex items-center justify-center w-full h-12 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-sm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  PDFni yuklab olish
+                </a>
               </div>
             </div>
           ) : (
