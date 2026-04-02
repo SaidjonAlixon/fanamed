@@ -1,7 +1,7 @@
 {
   "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @workspace/med-platform build && node ./copy-frontend-public.mjs",
+  "buildCommand": "pnpm --filter @workspace/med-platform build && (node ./copy-frontend-public.mjs || node ../../copy-frontend-public.mjs)",
   "outputDirectory": "public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
