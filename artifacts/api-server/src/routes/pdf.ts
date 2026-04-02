@@ -75,6 +75,8 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename=ma'lumotnoma_${patient.fullName.replace(/\s+/g, '_')}.pdf`);
+    // Avoid stale PDFs being cached by browsers/CDNs during rapid iteration.
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
 
     doc.pipe(res);
 
