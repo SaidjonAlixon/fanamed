@@ -27,6 +27,9 @@ function findLogoPath(): string | null {
 function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
   const candidates = weight === "bold"
     ? [
+        join(__dirname, "..", "assets", "fonts", "NotoSans-Bold.ttf"),
+        join(__dirname, "..", "assets", "fonts", "DejaVuSans-Bold.ttf"),
+        join(__dirname, "..", "assets", "fonts", "arialbd.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "NotoSans-Bold.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans-Bold.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "arialbd.ttf"),
@@ -39,6 +42,9 @@ function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
       ]
     : [
+        join(__dirname, "..", "assets", "fonts", "NotoSans-Regular.ttf"),
+        join(__dirname, "..", "assets", "fonts", "DejaVuSans.ttf"),
+        join(__dirname, "..", "assets", "fonts", "arial.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "NotoSans-Regular.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "arial.ttf"),
@@ -167,6 +173,12 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     const unicodeBoldFontPath = findUnicodeFontPath("bold");
     const normalFont = unicodeNormalFontPath || "Times-Roman";
     const boldFont = unicodeBoldFontPath || "Times-Bold";
+    if (!unicodeNormalFontPath || !unicodeBoldFontPath) {
+      req.log.warn(
+        { unicodeNormalFontPath, unicodeBoldFontPath, cwd: process.cwd(), __dirname },
+        "Unicode font fallback to Times-Roman/Times-Bold",
+      );
+    }
 
     doc.registerFont("DocFont-Normal", normalFont);
     doc.registerFont("DocFont-Bold", boldFont);
