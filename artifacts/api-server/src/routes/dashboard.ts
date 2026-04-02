@@ -76,6 +76,7 @@ router.get("/doctors", async (req, res): Promise<void> => {
       createdAt: usersTable.createdAt,
     }).from(usersTable).where(and(
       eq(usersTable.isActive, true),
+      eq(usersTable.role, "doctor"),
     ));
 
     res.json({
