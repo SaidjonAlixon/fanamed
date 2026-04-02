@@ -26,6 +26,16 @@ function findLogoPath(): string | null {
 
 const router: IRouter = Router();
 
+function formatDateDMY(value: string | Date | null | undefined): string {
+  if (!value) return "-";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(d.getFullYear());
+  return `${dd}.${mm}.${yyyy}`;
+}
+
 router.get("/:uuid", async (req, res): Promise<void> => {
   const { uuid } = req.params;
 
@@ -94,7 +104,8 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     doc.fillColor('#64748b').fontSize(10).font('Times-Roman-Normal').text('Tibbiy ko\'rikdan o\'tkazish natijalari bo\'yicha', 50, 125, { align: 'center', width: fullWidth });
     doc.fillColor('#1e293b').fontSize(18).font('Times-Roman-Bold').text('MA\'LUMOTNOMA', 50, 140, { align: 'center', width: fullWidth });
     const docNumber = record.verifyCode?.padEnd(9, '0').substring(0, 9) || Math.floor(100000000 + Math.random() * 899999999).toString();
-    doc.fillColor('#0284c7').fontSize(12).text(`№ FA #${docNumber}`, 50, 160, { align: 'center', width: fullWidth });
+    // Use "Nº" instead of "№" because built-in PDF fonts can render "№" incorrectly.
+    doc.fillColor('#0284c7').fontSize(12).text(`Nº FA ${docNumber}`, 50, 160, { align: 'center', width: fullWidth });
     
     doc.moveDown(3);
 
@@ -111,10 +122,10 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     const rows = [
         { label: 'JSHSHIR', value: patient.jshshir },
         { label: 'Pasport / ID-karta', value: patient.passport },
-        { label: 'Tug\'ilgan sana', value: new Date(patient.birthDate).toLocaleDateString() },
+        { label: 'Tug\'ilgan sana', value: formatDateDMY(patient.birthDate) },
         { label: 'Yashash joyi', value: (patient as any).address || '-' }, // Cast to any because of current TypeScript types
         { label: 'Ish / o\'qish joyi', value: (patient as any).workplace || '-' },
-        { label: 'Tibbiy ko\'rik sanasi', value: (record.checkDate || '-').replace('T', ' ') },
+        { label: 'Tibbiy ko\'rik sanasi', value: formatDateDMY(record.checkDate) },
     ];
 
     rows.forEach((row, index) => {
@@ -162,7 +173,7 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     
     const footerY = doc.y + 20;
     doc.fillColor('#475569').fontSize(11).font('Times-Roman-Normal').text('Ushbu ma\'lumotnomaning amal qilish muddati:', 50, footerY);
-    doc.fillColor('#0f172a').font('Times-Roman-Bold').text(record.nextCheckDate ? new Date(record.nextCheckDate).toLocaleDateString() + ' gacha' : '-', 350, footerY, { align: 'right', width: 195 });
+    doc.fillColor('#0f172a').font('Times-Roman-Bold').text(record.nextCheckDate ? `${formatDateDMY(record.nextCheckDate)} gacha` : '-', 350, footerY, { align: 'right', width: 195 });
 
     doc.moveDown(1.5);
     const chairmanY = doc.y;
