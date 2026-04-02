@@ -137,7 +137,8 @@ router.get("/:uuid", async (req, res): Promise<void> => {
         { label: 'Tug\'ilgan sana', value: formatDateDMY(patient.birthDate) },
         { label: 'Yashash joyi', value: (patient as any).address || '-' }, // Cast to any because of current TypeScript types
         { label: 'Ish / o\'qish joyi', value: (patient as any).workplace || '-' },
-        { label: 'Tibbiy ko\'rik sanasi', value: formatDateTimeDMY(record.checkDate) },
+        // Prefer explicit checkDate; fallback to createdAt to show time
+        { label: 'Tibbiy ko\'rik sanasi', value: formatDateTimeDMY(record.checkDate || record.createdAt) },
     ];
 
     rows.forEach((row, index) => {

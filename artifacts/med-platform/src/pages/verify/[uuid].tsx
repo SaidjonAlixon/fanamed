@@ -113,7 +113,17 @@ export default function VerifyPage() {
                 <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-2">
                   <span className="text-muted-foreground">Ko'rik sanasi:</span>
                   <span className="col-span-2 font-semibold">
-                    {result.medicalRecord.checkDate ? format(new Date(result.medicalRecord.checkDate), "dd.MM.yyyy HH:mm") : "-"}
+                    {(() => {
+                      const dt =
+                        // Prefer explicit checkDate when present
+                        result.medicalRecord.checkDate ||
+                        // Fallback to record createdAt (often the "tasdiqlangan vaqt" available in DB)
+                        (result.medicalRecord as any).createdAt;
+                      if (!dt) return "-";
+                      const d = new Date(dt);
+                      if (Number.isNaN(d.getTime())) return "-";
+                      return format(d, "dd.MM.yyyy HH:mm");
+                    })()}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-2">
