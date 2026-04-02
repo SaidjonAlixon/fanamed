@@ -25,8 +25,13 @@ function findLogoPath(): string | null {
 }
 
 function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
+  // Bundled build copies `assets` next to `dist` (see build.mjs). Prefer paths under
+  // __dirname first so Docker/Railway images that only ship `dist/` still find fonts.
   const candidates = weight === "bold"
     ? [
+        join(__dirname, "assets", "fonts", "NotoSans-Bold.ttf"),
+        join(__dirname, "assets", "fonts", "DejaVuSans-Bold.ttf"),
+        join(__dirname, "assets", "fonts", "arialbd.ttf"),
         join(__dirname, "..", "assets", "fonts", "NotoSans-Bold.ttf"),
         join(__dirname, "..", "assets", "fonts", "DejaVuSans-Bold.ttf"),
         join(__dirname, "..", "assets", "fonts", "arialbd.ttf"),
@@ -42,6 +47,9 @@ function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
       ]
     : [
+        join(__dirname, "assets", "fonts", "NotoSans-Regular.ttf"),
+        join(__dirname, "assets", "fonts", "DejaVuSans.ttf"),
+        join(__dirname, "assets", "fonts", "arial.ttf"),
         join(__dirname, "..", "assets", "fonts", "NotoSans-Regular.ttf"),
         join(__dirname, "..", "assets", "fonts", "DejaVuSans.ttf"),
         join(__dirname, "..", "assets", "fonts", "arial.ttf"),
@@ -115,6 +123,11 @@ function decodeAsWindows1251(value: string): string {
 function normalizePdfText(value: string | null | undefined): string {
   if (!value) return "-";
   const original = String(value);
+
+  // Already valid UTF-8 with Cyrillic — do NOT run latin1 repair (it corrupts BMP Cyrillic).
+  if (cyrillicScore(original) >= 1) {
+    return original;
+  }
 
   const candidates = [original];
   try {
