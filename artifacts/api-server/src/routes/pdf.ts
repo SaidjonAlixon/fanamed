@@ -27,14 +27,16 @@ function findLogoPath(): string | null {
 function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
   const candidates = weight === "bold"
     ? [
-        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans-Bold.ttf"),
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "arialbd.ttf"),
+        join(process.cwd(), "assets", "fonts", "arialbd.ttf"),
         "C:/Windows/Fonts/arialbd.ttf",
         "C:/Windows/Fonts/tahomabd.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
       ]
     : [
-        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans.ttf"),
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "arial.ttf"),
+        join(process.cwd(), "assets", "fonts", "arial.ttf"),
         "C:/Windows/Fonts/arial.ttf",
         "C:/Windows/Fonts/tahoma.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
