@@ -4,7 +4,7 @@
   "buildCommand": "pnpm --filter @workspace/api-server build && pnpm --filter @workspace/med-platform build && node ./copy-frontend-public.mjs",
   "outputDirectory": "public",
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/api/(.*)", "dest": "/api/[[...path]].ts" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html", "methods": ["GET", "HEAD"] }
   ],
