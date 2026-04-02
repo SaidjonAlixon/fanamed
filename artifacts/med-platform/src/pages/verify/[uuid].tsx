@@ -14,7 +14,7 @@ export default function VerifyPage() {
   const [result, setResult] = useState<VerifyResult | null>(null);
 
   const { data: info, isLoading: infoLoading, isError } = useGetVerifyInfo(uuid || "", {
-    query: { enabled: !!uuid, retry: false }
+    query: { enabled: !!uuid, retry: false, queryKey: [`/api/verify/${uuid || ""}`] }
   });
 
   const verifyCode = useVerifyCode({
@@ -111,9 +111,15 @@ export default function VerifyPage() {
                   <span className="col-span-2 font-semibold">{result.patient.passport}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-2">
-                  <span className="text-muted-foreground">Sana:</span>
+                  <span className="text-muted-foreground">Ko'rik sanasi:</span>
                   <span className="col-span-2 font-semibold">
-                    {result.medicalRecord.checkDate ? format(new Date(result.medicalRecord.checkDate), "dd.MM.yyyy") : "-"}
+                    {result.medicalRecord.checkDate ? format(new Date(result.medicalRecord.checkDate), "dd.MM.yyyy HH:mm") : "-"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-2">
+                  <span className="text-muted-foreground">Amal qilish muddati:</span>
+                  <span className="col-span-2 font-semibold">
+                    {result.medicalRecord.nextCheckDate ? `${format(new Date(result.medicalRecord.nextCheckDate), "dd.MM.yyyy")} gacha` : "-"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-2">

@@ -36,6 +36,16 @@ function formatDateDMY(value: string | Date | null | undefined): string {
   return `${dd}.${mm}.${yyyy}`;
 }
 
+function formatDateTimeDMY(value: string | Date | null | undefined): string {
+  if (!value) return "-";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+  const ddmmyyyy = formatDateDMY(d);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${ddmmyyyy} ${hh}:${min}`;
+}
+
 router.get("/:uuid", async (req, res): Promise<void> => {
   const { uuid } = req.params;
 
@@ -127,7 +137,7 @@ router.get("/:uuid", async (req, res): Promise<void> => {
         { label: 'Tug\'ilgan sana', value: formatDateDMY(patient.birthDate) },
         { label: 'Yashash joyi', value: (patient as any).address || '-' }, // Cast to any because of current TypeScript types
         { label: 'Ish / o\'qish joyi', value: (patient as any).workplace || '-' },
-        { label: 'Tibbiy ko\'rik sanasi', value: formatDateDMY(record.checkDate) },
+        { label: 'Tibbiy ko\'rik sanasi', value: formatDateTimeDMY(record.checkDate) },
     ];
 
     rows.forEach((row, index) => {
