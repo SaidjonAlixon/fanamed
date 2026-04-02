@@ -131,7 +131,7 @@ export default function VerifyStandalone() {
                 </div>
                 {result.medicalRecord.nextCheckDate && (
                   <div className="grid grid-cols-2 gap-2 text-sm border-b pb-3">
-                    <span className="text-gray-500">Keyingi ko'rik:</span>
+                    <span className="text-gray-500">Amal qilish muddati:</span>
                     <span className="font-semibold">{result.medicalRecord.nextCheckDate}</span>
                   </div>
                 )}

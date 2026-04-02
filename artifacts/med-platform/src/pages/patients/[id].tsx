@@ -61,7 +61,7 @@ import { Textarea } from "@/components/ui/textarea";
 const approveSchema = z.object({
   chairmanId: z.string().min(1, "Raisni tanlang"),
   checkDate: z.string().min(1, "Ko'rik sanasini tanlang"),
-  nextCheckDate: z.string().min(1, "Keyingi ko'rik sanasini tanlang"),
+  nextCheckDate: z.string().min(1, "Amal qilish muddatini tanlang"),
   decision: z.nativeEnum(MedicalRecordDecision)
 });
 
@@ -327,7 +327,7 @@ export default function PatientDetail() {
                       name="nextCheckDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Keyingi ko'rik muddati</FormLabel>
+                          <FormLabel>Amal qilish muddati</FormLabel>
                           <FormControl><Input type="date" {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
@@ -559,7 +559,7 @@ export default function PatientDetail() {
                           <div className="font-semibold">{record.checkDate ? format(new Date(record.checkDate), "dd.MM.yyyy") : "-"}</div>
                         </div>
                         <div>
-                          <div className="text-sm text-muted-foreground">Keyingi ko'rik sanasi</div>
+                          <div className="text-sm text-muted-foreground">Amal qilish muddati</div>
                           <div className="font-semibold">{record.nextCheckDate ? format(new Date(record.nextCheckDate), "dd.MM.yyyy") : "-"}</div>
                         </div>
                       </div>
