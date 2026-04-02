@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm } from "node:fs/promises";
+import { rm, cp } from "node:fs/promises";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
@@ -12,6 +12,7 @@ const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
 async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
+  const assetsDir = path.resolve(artifactDir, "assets");
   await rm(distDir, { recursive: true, force: true });
 
   await esbuild({
@@ -121,6 +122,10 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
   });
+
+  // Keep runtime assets (fonts/images) next to compiled output so PDF generation
+  // can reliably resolve Unicode fonts in all deploy environments.
+  await cp(assetsDir, path.resolve(distDir, "assets"), { recursive: true, force: true });
 }
 
 buildAll().catch((err) => {
