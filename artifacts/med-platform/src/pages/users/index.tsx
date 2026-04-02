@@ -58,13 +58,13 @@ export default function UsersList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Foydalanuvchilar</h1>
           <p className="text-muted-foreground">Tizim foydalanuvchilarini boshqarish</p>
         </div>
         <Link href="/users/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Yangi foydalanuvchi
           </Button>
@@ -73,7 +73,7 @@ export default function UsersList() {
 
       <Card>
         <CardHeader className="pb-3">
-          <div className="relative max-w-sm">
+          <div className="relative w-full sm:max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="F.I.Sh yoki username bo'yicha..."
@@ -90,7 +90,7 @@ export default function UsersList() {
             </div>
           ) : data?.users && data.users.length > 0 ? (
             <>
-              <div className="rounded-md border">
+              <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -154,7 +154,7 @@ export default function UsersList() {
                   </TableBody>
                 </Table>
               </div>
-              <div className="flex items-center justify-between space-x-2 py-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4">
                 <div className="text-sm text-muted-foreground">
                   Jami: {data.total} ta
                 </div>

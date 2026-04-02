@@ -35,7 +35,7 @@ export default function PatientsList() {
           <p className="text-muted-foreground">Tizimdagi barcha bemorlar ro'yxati</p>
         </div>
         <Link href="/patients/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Yangi bemor qo'shish
           </Button>
@@ -77,7 +77,7 @@ export default function PatientsList() {
             </div>
           ) : data?.patients && data.patients.length > 0 ? (
             <>
-              <div className="rounded-md border overflow-hidden">
+              <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -113,7 +113,7 @@ export default function PatientsList() {
                   </TableBody>
                 </Table>
               </div>
-              <div className="flex items-center justify-between space-x-2 py-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4">
                 <div className="text-sm text-muted-foreground">
                   Jami: {data.total} ta bemor
                 </div>
