@@ -12,14 +12,27 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function isValidUser(value: unknown): value is User {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.id === "number" && typeof v.username === "string" && typeof v.role === "string";
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
-  const { data: user, isLoading, refetch, isError } = useGetMe({
+  const { data: userRaw, isLoading, refetch, isError } = useGetMe({
     query: {
       retry: false,
     }
+    ,
+    request: {
+      // If `/api/*` accidentally rewrites to `index.html`, this forces JSON parsing
+      // and makes the request fail instead of treating HTML as "user".
+      responseType: "json",
+    },
   });
 
+  const user = isValidUser(userRaw) ? userRaw : null;
   const isAuthenticated = !!user;
 
   useEffect(() => {
