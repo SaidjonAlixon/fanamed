@@ -17,6 +17,7 @@ import NewUser from "@/pages/users/new";
 import EditUser from "@/pages/users/edit";
 import VerifyPage from "@/pages/verify/[uuid]";
 import VerifyStandalone from "@/pages/verify/index";
+import Settings from "@/pages/settings";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/users"><ProtectedRoute component={UsersList} /></Route>
       <Route path="/users/new"><ProtectedRoute component={NewUser} /></Route>
       <Route path="/users/:id/edit"><ProtectedRoute component={EditUser} /></Route>
+      <Route path="/settings"><ProtectedRoute component={Settings} /></Route>
 
       <Route component={NotFound} />
     </Switch>

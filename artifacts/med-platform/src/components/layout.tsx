@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, UsersRound, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, Users, UsersRound, LogOut, Menu, Settings as SettingsIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLogout } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/patients", label: "Bemorlar", icon: UsersRound },
     ...(hasUsersAccess ? [{ href: "/users", label: "Foydalanuvchilar", icon: Users }] : []),
+    { href: "/settings", label: "Sozlamalar", icon: SettingsIcon },
   ];
 
   const SidebarContent = () => (
