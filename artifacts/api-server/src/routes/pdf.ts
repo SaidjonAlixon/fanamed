@@ -27,7 +27,11 @@ function findLogoPath(): string | null {
 function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
   const candidates = weight === "bold"
     ? [
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "NotoSans-Bold.ttf"),
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans-Bold.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "arialbd.ttf"),
+        join(process.cwd(), "assets", "fonts", "NotoSans-Bold.ttf"),
+        join(process.cwd(), "assets", "fonts", "DejaVuSans-Bold.ttf"),
         join(process.cwd(), "assets", "fonts", "arialbd.ttf"),
         "C:/Windows/Fonts/arialbd.ttf",
         "C:/Windows/Fonts/tahomabd.ttf",
@@ -35,7 +39,11 @@ function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
       ]
     : [
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "NotoSans-Regular.ttf"),
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans.ttf"),
         join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "arial.ttf"),
+        join(process.cwd(), "assets", "fonts", "NotoSans-Regular.ttf"),
+        join(process.cwd(), "assets", "fonts", "DejaVuSans.ttf"),
         join(process.cwd(), "assets", "fonts", "arial.ttf"),
         "C:/Windows/Fonts/arial.ttf",
         "C:/Windows/Fonts/tahoma.ttf",
@@ -83,6 +91,45 @@ function buildSafePdfFilename(fullName: string): { ascii: string; utf8: string }
   };
 }
 
+function cyrillicScore(value: string): number {
+  // Cyrillic + Uzbek apostrophe chars commonly used in names/addresses.
+  const matches = value.match(/[А-Яа-яЁёЎўҚқҒғҲҳʼ‘’]/g);
+  return matches ? matches.length : 0;
+}
+
+function decodeAsLatin1Utf8(value: string): string {
+  return Buffer.from(value, "latin1").toString("utf8");
+}
+
+function decodeAsWindows1251(value: string): string {
+  const bytes = Uint8Array.from([...value].map((ch) => ch.charCodeAt(0) & 0xff));
+  return new TextDecoder("windows-1251").decode(bytes);
+}
+
+function normalizePdfText(value: string | null | undefined): string {
+  if (!value) return "-";
+  const original = String(value);
+
+  const candidates = [original];
+  try {
+    candidates.push(decodeAsLatin1Utf8(original));
+  } catch {}
+  try {
+    candidates.push(decodeAsWindows1251(original));
+  } catch {}
+
+  let best = original;
+  let bestScore = cyrillicScore(original);
+  for (const candidate of candidates) {
+    const score = cyrillicScore(candidate);
+    if (score > bestScore) {
+      best = candidate;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
 router.get("/:uuid", async (req, res): Promise<void> => {
   const { uuid } = req.params;
 
@@ -125,7 +172,11 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     doc.registerFont("DocFont-Bold", boldFont);
     doc.font("DocFont-Normal");
     
-    const safeFilename = buildSafePdfFilename(patient.fullName);
+    const normalizedFullName = normalizePdfText(patient.fullName);
+    const normalizedAddress = normalizePdfText((patient as any).address || "-");
+    const normalizedWorkplace = normalizePdfText((patient as any).workplace || "-");
+    const normalizedChairmanName = normalizePdfText(chairmanName);
+    const safeFilename = buildSafePdfFilename(normalizedFullName);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
@@ -168,7 +219,7 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     doc.moveDown(3);
 
     // Patient Name Header
-    doc.fillColor('#1e3a8a').fontSize(14).font("DocFont-Bold").text(patient.fullName.toUpperCase(), 50, 210);
+    doc.fillColor('#1e3a8a').fontSize(14).font("DocFont-Bold").text(normalizedFullName.toUpperCase(), 50, 210);
     doc.moveTo(50, 230).lineTo(545, 230).lineWidth(2).stroke('#0284c7');
 
     // Table Logic - Modern Look
@@ -181,8 +232,8 @@ router.get("/:uuid", async (req, res): Promise<void> => {
         { label: 'JSHSHIR', value: patient.jshshir },
         { label: 'Pasport / ID-karta', value: patient.passport },
         { label: 'Tug\'ilgan sana', value: formatDateDMY(patient.birthDate) },
-        { label: 'Yashash joyi', value: (patient as any).address || '-' }, // Cast to any because of current TypeScript types
-        { label: 'Ish / o\'qish joyi', value: (patient as any).workplace || '-' },
+        { label: 'Yashash joyi', value: normalizedAddress }, // Cast to any because of current TypeScript types
+        { label: 'Ish / o\'qish joyi', value: normalizedWorkplace },
         // Prefer explicit checkDate; fallback to createdAt to show time
         { label: 'Tibbiy ko\'rik sanasi', value: formatDateTimeDMY(record.checkDate || record.createdAt) },
     ];
@@ -237,7 +288,7 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     doc.moveDown(1.5);
     const chairmanY = doc.y;
     doc.fillColor('#475569').font("DocFont-Normal").text('Komissiya raisi F.I.O:', 50, chairmanY);
-    doc.fillColor('#0f172a').font("DocFont-Bold").text(chairmanName, 350, chairmanY, { align: 'right', width: 195 });
+    doc.fillColor('#0f172a').font("DocFont-Bold").text(normalizedChairmanName, 350, chairmanY, { align: 'right', width: 195 });
 
     // Bottom verification section at fixed absolute positions
     const bottomAreaY = 645;
