@@ -8,6 +8,11 @@
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html", "methods": ["GET", "HEAD"] }
   ],
+  "functions": {
+    "api/**/*": {
+      "includeFiles": "artifacts/api-server/dist/assets/fonts/**"
+    }
+  },
   "headers": [
     {
       "source": "/assets/(.*)",
