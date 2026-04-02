@@ -18,6 +18,7 @@ function findLogoPath(): string | null {
     join(__dirname, "..", "logo_fanamed.jpeg"),   // Railway: next to dist/
     join(process.cwd(), "logo_fanamed.jpeg"),      // Railway: cwd
     join(process.cwd(), "artifacts", "api-server", "logo_fanamed.jpeg"),
+    join(process.cwd(), "logo_rasmlar", "logo_fanamed.jpeg"), // Vercel/static build: repo root asset
     "c:/Users/Saidmuhammadalixon/Desktop/nasafmed/logo_rasmlar/logo_fanamed.jpeg", // Windows dev
   ];
   return candidates.find(p => existsSync(p)) || null;
