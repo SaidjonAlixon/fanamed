@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -14,6 +15,8 @@ export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newUsername, setNewUsername] = useState(user?.username ?? "");
   const [newPassword, setNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const onSave = async () => {
@@ -71,7 +74,23 @@ export default function Settings() {
         <CardContent className="space-y-4 max-w-xl">
           <div className="space-y-2">
             <div className="text-sm font-medium">Joriy parol</div>
-            <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+            <div className="relative">
+              <Input
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="••••••••"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                aria-label={showCurrentPassword ? "Parolni yashirish" : "Parolni ko‘rsatish"}
+              >
+                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -81,7 +100,23 @@ export default function Settings() {
 
           <div className="space-y-2">
             <div className="text-sm font-medium">Yangi parol (ixtiyoriy)</div>
-            <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="kamida 6 ta belgi" />
+            <div className="relative">
+              <Input
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="kamida 6 ta belgi"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                aria-label={showNewPassword ? "Parolni yashirish" : "Parolni ko‘rsatish"}
+              >
+                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
           <div className="flex justify-end">

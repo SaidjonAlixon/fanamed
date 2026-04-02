@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useLogin } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Foydalanuvchi nomini kiriting"),
@@ -23,6 +23,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { refetchUser } = useAuth();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
   
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -87,7 +88,22 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Parol</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          className="pr-10"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                          aria-label={showPassword ? "Parolni yashirish" : "Parolni ko‘rsatish"}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
