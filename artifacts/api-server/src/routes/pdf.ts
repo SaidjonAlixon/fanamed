@@ -24,6 +24,26 @@ function findLogoPath(): string | null {
   return candidates.find(p => existsSync(p)) || null;
 }
 
+function findUnicodeFontPath(weight: "normal" | "bold"): string | null {
+  const candidates = weight === "bold"
+    ? [
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans-Bold.ttf"),
+        "C:/Windows/Fonts/arialbd.ttf",
+        "C:/Windows/Fonts/tahomabd.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+      ]
+    : [
+        join(process.cwd(), "artifacts", "api-server", "assets", "fonts", "DejaVuSans.ttf"),
+        "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/tahoma.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      ];
+
+  return candidates.find((p) => existsSync(p)) || null;
+}
+
 const router: IRouter = Router();
 
 function formatDateDMY(value: string | Date | null | undefined): string {
@@ -78,10 +98,15 @@ router.get("/:uuid", async (req, res): Promise<void> => {
         size: 'A4'
     });
 
-    // Use built-in PDFKit fonts (cross-platform: works on Linux/Railway/Vercel)
-    doc.registerFont('Times-Roman-Normal', 'Times-Roman');
-    doc.registerFont('Times-Roman-Bold', 'Times-Bold');
-    doc.font('Times-Roman-Normal');
+    // Prefer Unicode-capable fonts for Cyrillic names; fallback to PDF built-ins.
+    const unicodeNormalFontPath = findUnicodeFontPath("normal");
+    const unicodeBoldFontPath = findUnicodeFontPath("bold");
+    const normalFont = unicodeNormalFontPath || "Times-Roman";
+    const boldFont = unicodeBoldFontPath || "Times-Bold";
+
+    doc.registerFont("DocFont-Normal", normalFont);
+    doc.registerFont("DocFont-Bold", boldFont);
+    doc.font("DocFont-Normal");
     
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename=ma'lumotnoma_${patient.fullName.replace(/\s+/g, '_')}.pdf`);
@@ -93,9 +118,9 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     // Header Section
     doc.rect(0, 0, 595, 10).fill('#0284c7'); // Top colored bar
     
-    doc.fontSize(12).font('Times-Roman-Bold').fillColor('#1f2937');
+    doc.fontSize(12).font("DocFont-Bold").fillColor('#1f2937');
     doc.text('"FANA MED" TIBBIY KO\'RIK', 50, 45, { width: 300 });
-    doc.fontSize(10).font('Times-Roman-Normal').text('MAS\'ULIYATI CHEKLANGAN JAMIYATI', 50, 65);
+    doc.fontSize(10).font("DocFont-Normal").text('MAS\'ULIYATI CHEKLANGAN JAMIYATI', 50, 65);
 
     // Logo — dynamically found across platforms
     const logoPath = findLogoPath();
@@ -113,8 +138,8 @@ router.get("/:uuid", async (req, res): Promise<void> => {
 
     // Centered Title Block
     doc.rect(50, 115, fullWidth, 60).fill('#f8fafc'); // Light subtle background
-    doc.fillColor('#64748b').fontSize(10).font('Times-Roman-Normal').text('Tibbiy ko\'rikdan o\'tkazish natijalari bo\'yicha', 50, 125, { align: 'center', width: fullWidth });
-    doc.fillColor('#1e293b').fontSize(18).font('Times-Roman-Bold').text('MA\'LUMOTNOMA', 50, 140, { align: 'center', width: fullWidth });
+    doc.fillColor('#64748b').fontSize(10).font("DocFont-Normal").text('Tibbiy ko\'rikdan o\'tkazish natijalari bo\'yicha', 50, 125, { align: 'center', width: fullWidth });
+    doc.fillColor('#1e293b').fontSize(18).font("DocFont-Bold").text('MA\'LUMOTNOMA', 50, 140, { align: 'center', width: fullWidth });
     const docNumber = record.verifyCode?.padEnd(9, '0').substring(0, 9) || Math.floor(100000000 + Math.random() * 899999999).toString();
     // Use "Nº" instead of "№" because built-in PDF fonts can render "№" incorrectly.
     doc.fillColor('#0284c7').fontSize(12).text(`Nº FA ${docNumber}`, 50, 160, { align: 'center', width: fullWidth });
@@ -122,7 +147,7 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     doc.moveDown(3);
 
     // Patient Name Header
-    doc.fillColor('#1e3a8a').fontSize(14).font('Times-Roman-Bold').text(patient.fullName.toUpperCase(), 50, 210);
+    doc.fillColor('#1e3a8a').fontSize(14).font("DocFont-Bold").text(patient.fullName.toUpperCase(), 50, 210);
     doc.moveTo(50, 230).lineTo(545, 230).lineWidth(2).stroke('#0284c7');
 
     // Table Logic - Modern Look
@@ -149,8 +174,8 @@ router.get("/:uuid", async (req, res): Promise<void> => {
             doc.rect(50, y, 495, rowHeight).fill('#f1f5f9');
         }
 
-        doc.fillColor('#475569').font('Times-Roman-Normal').fontSize(11).text(row.label, 60, y + 10);
-        doc.fillColor('#0f172a').font('Times-Roman-Bold').text(row.value, 50 + col1Width + 10, y + 10);
+        doc.fillColor('#475569').font("DocFont-Normal").fontSize(11).text(row.label, 60, y + 10);
+        doc.fillColor('#0f172a').font("DocFont-Bold").text(row.value, 50 + col1Width + 10, y + 10);
     });
 
     const tableEndY = startY + (rows.length * rowHeight);
@@ -160,11 +185,11 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     
     // Conclusion Header with accent
     doc.rect(50, tableEndY + 40, fullWidth, 25).fill('#e0f2fe');
-    doc.fillColor('#0369a1').fontSize(12).font('Times-Roman-Bold').text('XULOSA', 50, tableEndY + 47, { align: 'center', width: fullWidth });
+    doc.fillColor('#0369a1').fontSize(12).font("DocFont-Bold").text('XULOSA', 50, tableEndY + 47, { align: 'center', width: fullWidth });
     
     const resultY = tableEndY + 80;
     const label = 'Tibbiy ko\'rik natijalari bo\'yicha:';
-    doc.fillColor('#1e293b').fontSize(12).font('Times-Roman-Normal').text(label, 50, resultY);
+    doc.fillColor('#1e293b').fontSize(12).font("DocFont-Normal").text(label, 50, resultY);
     
     const decisionText = record.decision === 'allowed' ? 'Ishlashga ruxsat beriladi' : 'Ishlashga ruxsat berilmadi';
     const stampColor = record.decision === 'allowed' ? '#059669' : '#dc2626';
@@ -177,7 +202,7 @@ router.get("/:uuid", async (req, res): Promise<void> => {
 
     // Stamp-like rectangle
     doc.lineWidth(2.5).strokeColor(stampColor).rect(stampX, resultY - 6, stampWidth, stampHeight).stroke();
-    doc.fillColor(stampColor).fontSize(11).font('Times-Roman-Bold').text(decisionText.toUpperCase(), stampX, resultY, { 
+    doc.fillColor(stampColor).fontSize(11).font("DocFont-Bold").text(decisionText.toUpperCase(), stampX, resultY, { 
       align: 'center', 
       width: stampWidth 
     });
@@ -185,13 +210,13 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     doc.moveDown(3);
     
     const footerY = doc.y + 20;
-    doc.fillColor('#475569').fontSize(11).font('Times-Roman-Normal').text('Ushbu ma\'lumotnomaning amal qilish muddati:', 50, footerY);
-    doc.fillColor('#0f172a').font('Times-Roman-Bold').text(record.nextCheckDate ? `${formatDateDMY(record.nextCheckDate)} gacha` : '-', 350, footerY, { align: 'right', width: 195 });
+    doc.fillColor('#475569').fontSize(11).font("DocFont-Normal").text('Ushbu ma\'lumotnomaning amal qilish muddati:', 50, footerY);
+    doc.fillColor('#0f172a').font("DocFont-Bold").text(record.nextCheckDate ? `${formatDateDMY(record.nextCheckDate)} gacha` : '-', 350, footerY, { align: 'right', width: 195 });
 
     doc.moveDown(1.5);
     const chairmanY = doc.y;
-    doc.fillColor('#475569').font('Times-Roman-Normal').text('Komissiya raisi F.I.O:', 50, chairmanY);
-    doc.fillColor('#0f172a').font('Times-Roman-Bold').text(chairmanName, 350, chairmanY, { align: 'right', width: 195 });
+    doc.fillColor('#475569').font("DocFont-Normal").text('Komissiya raisi F.I.O:', 50, chairmanY);
+    doc.fillColor('#0f172a').font("DocFont-Bold").text(chairmanName, 350, chairmanY, { align: 'right', width: 195 });
 
     // Bottom verification section at fixed absolute positions
     const bottomAreaY = 645;
@@ -213,29 +238,29 @@ router.get("/:uuid", async (req, res): Promise<void> => {
     // Right: Verification info — all at absolute Y positions
     const verifyX = 170;
 
-    doc.fillColor('#0f172a').fontSize(11).font('Times-Roman-Bold')
+    doc.fillColor('#0f172a').fontSize(11).font("DocFont-Bold")
        .text("Hujjat haqiqiyligini tekshirish:", verifyX, bottomAreaY + 5, { lineBreak: false });
 
-    doc.fillColor('#475569').fontSize(9).font('Times-Roman-Normal')
+    doc.fillColor('#475569').fontSize(9).font("DocFont-Normal")
        .text("1. QR-kodni skaner qiling yoki quyidagi saytga o'ting:", verifyX, bottomAreaY + 22, { lineBreak: false });
-    doc.fillColor('#0284c7').fontSize(9).font('Times-Roman-Bold')
+    doc.fillColor('#0284c7').fontSize(9).font("DocFont-Bold")
        .text("fanamed.uz/verify", verifyX + 8, bottomAreaY + 34, { lineBreak: false });
 
-    doc.fillColor('#475569').fontSize(9).font('Times-Roman-Normal')
+    doc.fillColor('#475569').fontSize(9).font("DocFont-Normal")
        .text("2. Quyidagi tekshirish kodini kiriting:", verifyX, bottomAreaY + 50, { lineBreak: false });
 
     // Verification Code box
     const codeBoxX = verifyX + 8;
     const codeBoxY = bottomAreaY + 63;
     doc.rect(codeBoxX, codeBoxY, 185, 36).fill('#eff6ff').stroke('#0284c7');
-    doc.fillColor('#0c4a6e').fontSize(26).font('Times-Roman-Bold')
+    doc.fillColor('#0c4a6e').fontSize(26).font("DocFont-Bold")
        .text(record.verifyCode || '------', codeBoxX, codeBoxY + 5, { width: 185, align: 'center', lineBreak: false });
 
     // Item 3 — two lines, NO lineBreak to prevent page jump
     const item3Y = codeBoxY + 43;
-    doc.fillColor('#64748b').fontSize(7.5).font('Times-Roman-Normal')
+    doc.fillColor('#64748b').fontSize(7.5).font("DocFont-Normal")
        .text("3. QR-kod skaner qilinganda, ushbu hujjatning nusxasi \"FANA MED TIBBIY KO'RIK\" MCHJning rasmiy", verifyX + 8, item3Y, { lineBreak: false });
-    doc.fillColor('#64748b').fontSize(7.5).font('Times-Roman-Normal')
+    doc.fillColor('#64748b').fontSize(7.5).font("DocFont-Normal")
        .text("   axborot resursidan fanamed.uz domeni orqali generatsiya qilinadigan tibbiy ma'lumotnoma.", verifyX + 8, item3Y + 11, { lineBreak: false });
 
     // Blue bottom bar — drawn LAST to avoid triggering a new page

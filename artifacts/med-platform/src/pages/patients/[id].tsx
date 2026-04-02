@@ -277,10 +277,11 @@ export default function PatientDetail() {
               <Form {...approveForm}>
                 <form onSubmit={approveForm.handleSubmit((data) => {
                   if (!record?.id) return;
+                  const selectedChairmanId = Number(data.chairmanId);
                   
                   const payload = {
-                    doctorId: user?.id,
-                    chairmanId: Number(data.chairmanId),
+                    doctorId: selectedChairmanId,
+                    chairmanId: selectedChairmanId,
                     checkDate: data.checkDate.replace('T', ' '),
                     nextCheckDate: data.nextCheckDate,
                     decision: data.decision
