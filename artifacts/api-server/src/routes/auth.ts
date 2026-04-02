@@ -6,10 +6,9 @@ import { LoginBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
-declare module "express-session" {
-  interface SessionData {
-    userId?: number;
-  }
+type Session = { userId?: number } | null | undefined;
+function getSession(req: any): Session {
+  return req.session as Session;
 }
 
 router.post("/login", async (req, res): Promise<void> => {
@@ -36,7 +35,8 @@ router.post("/login", async (req, res): Promise<void> => {
       return;
     }
 
-    req.session.userId = user.id;
+    const sess = getSession(req) ?? (req.session = {});
+    (sess as any).userId = user.id;
 
     const { passwordHash: _, ...safeUser } = user;
     res.json({ user: { ...safeUser, createdAt: safeUser.createdAt.toISOString() }, message: "Muvaffaqiyatli kirildi" });
@@ -47,23 +47,23 @@ router.post("/login", async (req, res): Promise<void> => {
 });
 
 router.post("/logout", (req, res): void => {
-  req.session.destroy(() => {
-    res.json({ success: true, message: "Chiqildi" });
-  });
+  req.session = null;
+  res.json({ success: true, message: "Chiqildi" });
 });
 
 router.get("/me", async (req, res): Promise<void> => {
-  if (!req.session.userId) {
+  const sess = getSession(req);
+  if (!sess?.userId) {
     res.status(401).json({ error: "Unauthorized", message: "Tizimga kirmagan" });
     return;
   }
 
   try {
-    const users = await db.select().from(usersTable).where(eq(usersTable.id, req.session.userId)).limit(1);
+    const users = await db.select().from(usersTable).where(eq(usersTable.id, sess.userId)).limit(1);
     const user = users[0];
 
     if (!user || !user.isActive) {
-      req.session.destroy(() => {});
+      req.session = null;
       res.status(401).json({ error: "Unauthorized", message: "Foydalanuvchi topilmadi" });
       return;
     }
