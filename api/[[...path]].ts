@@ -1,20 +1,25 @@
-import app from "../artifacts/api-server/src/app";
-
 /**
  * Single entrypoint for all `/api/*` routes.
  *
- * Vite/React frontend makes calls to `/api/...` in production.
- * Express app is already mounted under `/api`, so we ensure `req.url`
- * includes the `/api` prefix before delegating.
+ * IMPORTANT: We import the prebuilt JS bundle from `artifacts/api-server/dist`
+ * to avoid Vercel TypeScript typechecking the entire Express codebase.
  */
-export default function handler(req: any, res: any) {
+let _appPromise: Promise<any> | null = null;
+
+async function getApp(): Promise<any> {
+  if (_appPromise) return _appPromise;
+  // @ts-expect-error built at deploy time by `pnpm --filter @workspace/api-server build`
+  _appPromise = import("../artifacts/api-server/dist/vercel.mjs").then((m) => m.default ?? m);
+  return _appPromise;
+}
+
+export default async function handler(req: any, res: any) {
   if (typeof req.url === "string" && !req.url.startsWith("/api")) {
     req.url = `/api${req.url}`;
   }
 
-  // Express 5 types may not expose `.handle(...)` even though it exists at runtime.
-  const anyApp = app as any;
-  if (typeof anyApp.handle === "function") return anyApp.handle(req, res);
-  return anyApp(req, res);
+  const app = await getApp();
+  if (typeof app?.handle === "function") return app.handle(req, res);
+  return app(req, res);
 }
 
